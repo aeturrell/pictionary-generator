@@ -15,9 +15,13 @@ def main():
 
     Given it a whirl to find a book, TV programme, or film to use in pictionary.
     """
-    clicked = st.button('Click to refresh data')
+    clicked = st.button("Click to refresh data")
     if clicked:
-        st.write(df.sample(1, weights='weight'))
+        row = df.sample(1, weights="weight")
+        st.write("You should draw:")
+        st.write(f'{row["Title"].values[0]},')
+        st.write("which is of type:")
+        st.write(f'{row["Type"].values[0]}.')
     """
     """
 
@@ -30,7 +34,10 @@ def get_data():
         "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 "
         "Safari/537.36"
     )
-    headers = {"User-Agent": user_agent_desktop, "Accept-Language": "en-US,en;q=0.8"}
+    headers = {
+        "User-Agent": user_agent_desktop,
+        "Accept-Language": "en-US,en;q=0.8",
+    }
     url = "http://www.imdb.com/chart/top"
     response = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.text, "lxml")
@@ -49,22 +56,29 @@ def get_data():
     t_response = requests.get(t_url, headers=headers)
     t_soup = BeautifulSoup(t_response.text, "lxml")
     t_divs = t_soup.findAll("div", {"class": "item-heading"})
-    tv_shows = [x.text.split(">")[-1].replace("</a>", "").strip() for x in t_divs]
+    tv_shows = [
+        x.text.split(">")[-1].replace("</a>", "").strip() for x in t_divs
+    ]
     col_list = ["Title", "Type"]
     df = pd.concat(
         [
             pd.DataFrame(
-                np.array([m_strings, ["Film"] * len(m_strings)]).T, columns=col_list
+                np.array([m_strings, ["Film"] * len(m_strings)]).T,
+                columns=col_list,
             ),
             pd.DataFrame(
                 np.array([tv_shows, ["TV"] * len(tv_shows)]).T, columns=col_list
             ),
-            pd.DataFrame(np.array([books, ["Book"] * len(books)]).T, columns=col_list),
+            pd.DataFrame(
+                np.array([books, ["Book"] * len(books)]).T, columns=col_list
+            ),
         ],
         axis=0,
     )
     df["weight"] = 1 / 3
-    df["weight"] = df.groupby("Type")["weight"].transform(lambda x: x / x.count())
+    df["weight"] = df.groupby("Type")["weight"].transform(
+        lambda x: x / x.count()
+    )
     return df
 
 
