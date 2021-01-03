@@ -19,11 +19,6 @@ def main():
     if clicked:
         st.write(df.sample(1, weights='weight'))
     """
-
-    The code for this app is available at:
-
-    [https://github.com/aeturrell/millennium-app]
-    (https://github.com/aeturrell/millennium-app)
     """
 
 
